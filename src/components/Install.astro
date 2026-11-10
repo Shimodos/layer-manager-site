@@ -8,12 +8,12 @@ const steps = [
 const keys = [
   ['Click a row', 'Highlight a layer, or select an object in the scene'],
   ['Ctrl + click an object', 'Add it to the selection'],
-  ['Double-click or F2', 'Rename a layer'],
+  ['Double-click a layer', 'Rename it in place'],
+  ['Click the chevron', 'Open or close a layer'],
+  ['Click the colour swatch', 'Change the layer colour'],
   ['Alt + click the eye', 'Isolate the layer'],
+  ['Click the lock', 'Open or close a group, or all groups of a layer'],
   ['Right-click', 'Menu: current layer, child layer, move, delete'],
-  ['→ and ←', 'Open and close the highlighted layer'],
-  ['Delete', 'Delete the highlighted layer'],
-  ['Ctrl + F', 'Jump to the search box'],
 ];
 ---
 
@@ -35,7 +35,7 @@ const keys = [
     </ol>
 
     <div class="mt-16 max-w-3xl">
-      <h3 class="text-xl font-semibold tracking-tight">Mouse and keyboard</h3>
+      <h3 class="text-xl font-semibold tracking-tight">Around the panel</h3>
       <dl class="mt-6 divide-y divide-line border-y border-line text-[15px] dark:divide-line-dark dark:border-line-dark">
         {keys.map(([key, what]) => (
           <div class="grid grid-cols-[minmax(0,13rem)_1fr] gap-4 py-3">
