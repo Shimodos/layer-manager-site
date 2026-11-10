@@ -1,0 +1,44 @@
+---
+import Icon from './Icon.astro';
+
+const features = [
+  { icon: 'tree', title: 'Layers as a tree', text: 'Nested layers sit under their parents, each with its colour and object count. Create a child layer from the right-click menu.' },
+  { icon: 'cursor', title: 'Objects inside each layer', text: 'Open a layer to list what is on it. Click a row to select the object in the viewport, Ctrl+click to add to the selection.' },
+  { icon: 'eye', title: 'Hide and freeze on every row', text: 'One click on the eye or the snowflake, for a whole layer or for a single object.' },
+  { icon: 'lock', title: 'Groups without the menu', text: 'A lock on group rows opens and closes the group. The lock on a layer row does it for every group on that layer.' },
+  { icon: 'search', title: 'Search', text: 'Type a part of a name and the list narrows to matching layers and objects.' },
+  { icon: 'focus', title: 'Isolate a layer', text: 'Alt+click the eye to hide every other layer. Parents and nested layers stay visible; Show All brings the rest back.' },
+  { icon: 'moveIn', title: 'Move the selection', text: 'Highlight a layer and press Move Selection Here, or send a single object to another layer from its menu.' },
+  { icon: 'palette', title: 'Layer colours', text: 'The swatch shows the layer wire colour. Click it to pick another one.' },
+  { icon: 'refresh', title: 'Follows the scene', text: 'New, deleted, renamed, hidden or frozen objects and layers show up on their own, also when changed in Scene Explorer.' },
+  { icon: 'undo', title: 'Undo friendly', text: 'Every change the panel makes is a single named undo step. Ctrl+Z works the way you expect.' },
+  { icon: 'zap', title: 'Light on heavy scenes', text: 'Object rows are built only for the layers you open, and whole-scene scans run in native MAXScript.' },
+  { icon: 'minimize', title: 'Rolls up when not needed', text: 'Collapse the panel into its title bar and it parks at the bottom edge of the 3ds Max window.' },
+] as const;
+---
+
+<section id="features" class="border-t border-line dark:border-line-dark">
+  <div class="mx-auto max-w-6xl px-6 py-24">
+    <div class="max-w-2xl">
+      <p class="text-sm font-semibold tracking-wide text-accent-deep uppercase dark:text-accent">Features</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Everything about a layer on one row</h2>
+      <p class="mt-4 text-lg text-ink-muted text-pretty dark:text-ink-muted-dark">
+        The built-in Scene Explorer does a lot. This panel does one thing: layers, in a window small enough to keep open.
+      </p>
+    </div>
+
+    <ul class="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+      {features.map((f) => (
+        <li class="flex gap-4">
+          <span class="mt-0.5 grid size-10 shrink-0 place-items-center rounded-xl bg-card text-ink ring-1 ring-line dark:bg-card-dark dark:text-ink-dark dark:ring-line-dark">
+            <Icon name={f.icon} size={20} />
+          </span>
+          <div>
+            <h3 class="font-semibold tracking-tight">{f.title}</h3>
+            <p class="mt-1.5 text-[15px] leading-relaxed text-ink-muted dark:text-ink-muted-dark">{f.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

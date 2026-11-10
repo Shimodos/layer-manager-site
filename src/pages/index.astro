@@ -1,0 +1,27 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Features from '../components/Features.astro';
+import Themes from '../components/Themes.astro';
+import Install from '../components/Install.astro';
+import Faq from '../components/Faq.astro';
+import Download from '../components/Download.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Layout
+  title="Layer Manager — a compact layer panel for 3ds Max"
+  description="A free, open-source floating panel for Autodesk 3ds Max: nested layers and their objects on one list, with hide, freeze, group, colour and search on every row. Follows the scene live and matches the dark or light 3ds Max theme."
+>
+  <Nav />
+  <main>
+    <Hero />
+    <Features />
+    <Themes />
+    <Install />
+    <Faq />
+    <Download />
+  </main>
+  <Footer />
+</Layout>

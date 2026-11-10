@@ -1,0 +1,49 @@
+---
+const steps = [
+  { title: 'Download the .mzp', text: 'One small file from the latest GitHub release. It holds the Python script, the toolbar icons and an installer.' },
+  { title: 'Drop it into 3ds Max', text: 'Drag the file onto a viewport, or use Scripting → Run Script. The script is copied to your user scripts folder and older versions are removed.' },
+  { title: 'Put the button on a toolbar', text: 'Customize → Customize User Interface → Toolbars, category “AD Tools”, drag “LayerMgr” onto any toolbar. Updating later keeps the button.' },
+];
+
+const keys = [
+  ['Click a row', 'Highlight a layer, or select an object in the scene'],
+  ['Ctrl + click an object', 'Add it to the selection'],
+  ['Double-click or F2', 'Rename a layer'],
+  ['Alt + click the eye', 'Isolate the layer'],
+  ['Right-click', 'Menu: current layer, child layer, move, delete'],
+  ['→ and ←', 'Open and close the highlighted layer'],
+  ['Delete', 'Delete the highlighted layer'],
+  ['Ctrl + F', 'Jump to the search box'],
+];
+---
+
+<section id="install" class="border-t border-line dark:border-line-dark">
+  <div class="mx-auto max-w-6xl px-6 py-24">
+    <div class="max-w-2xl">
+      <p class="text-sm font-semibold tracking-wide text-accent-deep uppercase dark:text-accent">Install</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Three steps, no admin rights</h2>
+    </div>
+
+    <ol class="mt-12 grid gap-6 md:grid-cols-3">
+      {steps.map((s, i) => (
+        <li class="rounded-2xl bg-card p-6 ring-1 ring-line dark:bg-card-dark dark:ring-line-dark">
+          <span class="grid size-9 place-items-center rounded-full bg-accent-soft text-sm font-semibold text-accent-deep dark:bg-accent/15 dark:text-accent">{i + 1}</span>
+          <h3 class="mt-4 font-semibold tracking-tight">{s.title}</h3>
+          <p class="mt-2 text-[15px] leading-relaxed text-ink-muted dark:text-ink-muted-dark">{s.text}</p>
+        </li>
+      ))}
+    </ol>
+
+    <div class="mt-16 max-w-3xl">
+      <h3 class="text-xl font-semibold tracking-tight">Mouse and keyboard</h3>
+      <dl class="mt-6 divide-y divide-line border-y border-line text-[15px] dark:divide-line-dark dark:border-line-dark">
+        {keys.map(([key, what]) => (
+          <div class="grid grid-cols-[minmax(0,13rem)_1fr] gap-4 py-3">
+            <dt class="font-medium">{key}</dt>
+            <dd class="text-ink-muted dark:text-ink-muted-dark">{what}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,42 @@
+---
+import Icon from './Icon.astro';
+
+const repo = 'https://github.com/Shimodos/LayerManager';
+---
+
+<section id="download" class="border-t border-line dark:border-line-dark">
+  <div class="mx-auto max-w-6xl px-6 py-24">
+    <div class="relative overflow-hidden rounded-3xl bg-ink px-8 py-14 text-white sm:px-14 dark:bg-card-dark dark:ring-1 dark:ring-line-dark">
+      <div class="pointer-events-none absolute -top-32 -right-24 h-80 w-80 rounded-full bg-accent/30 blur-3xl" aria-hidden="true"></div>
+
+      <div class="relative max-w-2xl">
+        <h2 class="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Get Layer Manager</h2>
+        <p class="mt-4 text-lg text-white/70 text-pretty">
+          One .mzp file. Drop it into 3ds Max, put the button on a toolbar, and the panel is one click away.
+        </p>
+
+        <div class="mt-8 flex flex-wrap items-center gap-4">
+          <a
+            href={`${repo}/releases/latest/download/LayerManager.mzp`}
+            class="inline-flex h-12 items-center gap-2.5 rounded-full bg-accent px-6 text-base font-semibold text-white shadow-lg shadow-accent/30 transition hover:bg-accent-deep"
+          >
+            <Icon name="download" size={18} />
+            Download LayerManager.mzp
+          </a>
+          <a
+            href={`${repo}/releases`}
+            class="inline-flex h-12 items-center gap-2 rounded-full px-5 text-base font-medium text-white/70 transition hover:text-white"
+          >
+            All releases
+          </a>
+        </div>
+
+        <ul class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/60">
+          <li class="flex items-center gap-1.5"><Icon name="check" size={16} class="text-accent" /> Tested in 3ds Max 2024 and 2026</li>
+          <li class="flex items-center gap-1.5"><Icon name="check" size={16} class="text-accent" /> MIT license</li>
+          <li class="flex items-center gap-1.5"><Icon name="code" size={16} class="text-accent" /> <a href={repo} class="underline decoration-white/30 underline-offset-4 transition hover:text-white">Source on GitHub</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>

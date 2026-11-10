@@ -1,0 +1,153 @@
+---
+// The animated tour of the panel. Every frame is a real render of the panel
+// made inside 3ds Max (LayerManager/tools/make_shots.ps1); demo.json says where
+// the pointer goes before each frame. The panel follows the site theme, like it
+// follows the 3ds Max theme.
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import manifest from '../assets/demo/demo.json';
+
+const files = import.meta.glob<{ default: ImageMetadata }>('../assets/demo/*.png', { eager: true });
+const image = (name: string) => files[`../assets/demo/${name}`].default;
+
+const { width, height } = manifest;
+const themes = [
+  { key: 'dark', frames: manifest.themes.dark, class: 'hidden dark:block' },
+  { key: 'light', frames: manifest.themes.light, class: 'dark:hidden' },
+];
+const steps = manifest.themes.dark.map((f) => ({
+  caption: f.caption,
+  at: f.at ? [(f.at[0] / width) * 100, (f.at[1] / height) * 100] : null,
+}));
+---
+
+<figure
+  class="demo mx-auto w-full max-w-[380px]"
+  data-steps={JSON.stringify(steps)}
+  aria-label="Animated tour: layers are expanded, an object is selected, a group is opened, a layer is hidden, another is frozen, and the list is searched."
+>
+  <div
+    class="relative overflow-hidden rounded-2xl ring-1 ring-black/10 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.45)] dark:ring-white/10 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)]"
+    style={`aspect-ratio: ${width} / ${height}`}
+  >
+    {themes.map((theme) => (
+      <div class:list={['absolute inset-0', theme.class]}>
+        {theme.frames.map((frame, i) => (
+          <Image
+            src={image(frame.image)}
+            alt={i === 0 ? 'Layer Manager panel in 3ds Max' : ''}
+            width={width * 2}
+            loading="eager"
+            data-frame={i}
+            class:list={['demo-frame absolute inset-0 size-full', i === 0 && 'is-on']}
+          />
+        ))}
+      </div>
+    ))}
+
+    <div class="demo-pointer pointer-events-none absolute z-10 opacity-0" style="left: 70%; top: 85%" aria-hidden="true">
+      <span class="demo-ring absolute top-0 left-0 size-9 rounded-full border-2 border-accent"></span>
+      <svg width="22" height="22" viewBox="0 0 24 24" class="relative drop-shadow-[0_2px_3px_rgba(0,0,0,0.45)]">
+        <path d="M4 2.500 19.500 11l-6.800 1.900L10.300 20 4 2.500Z" fill="#fff" stroke="#111" stroke-width="1.400" stroke-linejoin="round" />
+      </svg>
+    </div>
+  </div>
+
+  <figcaption class="mt-5 text-center">
+    <p class="demo-caption min-h-[1.5rem] text-sm font-medium text-ink-muted dark:text-ink-muted-dark">{steps[0].caption}</p>
+    <div class="mt-3 flex justify-center gap-1.5">
+      {steps.map((step, i) => (
+        <button
+          type="button"
+          data-dot={i}
+          aria-label={`Step ${i + 1}: ${step.caption}`}
+          class:list={['demo-dot h-1.5 w-1.5 cursor-pointer rounded-full bg-line dark:bg-line-dark', i === 0 && 'is-on']}
+        ></button>
+      ))}
+    </div>
+  </figcaption>
+</figure>
+
+<script>
+  type Step = { caption: string; at: [number, number] | null };
+
+  const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  document.querySelectorAll<HTMLElement>('.demo').forEach((root) => {
+    const steps: Step[] = JSON.parse(root.dataset.steps ?? '[]');
+    const frames = root.querySelectorAll<HTMLElement>('[data-frame]');
+    const dots = root.querySelectorAll<HTMLElement>('[data-dot]');
+    const caption = root.querySelector<HTMLElement>('.demo-caption')!;
+    const pointer = root.querySelector<HTMLElement>('.demo-pointer')!;
+    let run = 0; // bumped to cancel the loop in flight
+
+    const show = (i: number) => {
+      frames.forEach((f) => f.classList.toggle('is-on', Number(f.dataset.frame) === i));
+      dots.forEach((d) => d.classList.toggle('is-on', Number(d.dataset.dot) === i));
+      caption.textContent = steps[i].caption;
+    };
+
+    // Frames of the theme on screen (the other stack is display: none and never loads).
+    const loaded = () =>
+      [...frames]
+        .filter((f) => f.offsetParent !== null)
+        .every((f) => (f as HTMLImageElement).complete && (f as HTMLImageElement).naturalWidth > 0);
+
+    const play = async () => {
+      const mine = ++run;
+      const alive = () => mine === run;
+      for (let waited = 0; !loaded() && waited < 10000 && alive(); waited += 150) await sleep(150);
+      while (alive()) {
+        show(0);
+        pointer.style.opacity = '0';
+        pointer.style.left = '70%';
+        pointer.style.top = '85%';
+        await sleep(1800);
+        for (let i = 1; i < steps.length && alive(); i++) {
+          const at = steps[i].at;
+          if (at) {
+            pointer.style.opacity = '1';
+            pointer.style.left = `${at[0]}%`;
+            pointer.style.top = `${at[1]}%`;
+            await sleep(850);
+            if (!alive()) return;
+            pointer.classList.remove('is-click');
+            void pointer.offsetWidth; // restart the click animation
+            pointer.classList.add('is-click');
+            await sleep(160);
+          }
+          if (!alive()) return;
+          show(i);
+          await sleep(1900);
+        }
+        await sleep(1600);
+      }
+    };
+
+    // A dot jumps to its step and stops the tour; the tour resumes when the demo scrolls back in.
+    dots.forEach((dot) =>
+      dot.addEventListener('click', () => {
+        run++;
+        pointer.style.opacity = '0';
+        show(Number(dot.dataset.dot));
+      }),
+    );
+
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const forced = new URLSearchParams(location.search).has('animate');
+    if (reduced && !forced) {
+      show(3); // a telling still: layers open, an object selected
+      return;
+    }
+
+    new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) play();
+          else run++;
+        }
+      },
+      { threshold: 0.35 },
+    ).observe(root);
+  });
+</script>

@@ -1,0 +1,39 @@
+---
+import Shot from './Shot.astro';
+import dark from '../assets/shots/panel-dark.png';
+import light from '../assets/shots/panel-light.png';
+import search from '../assets/shots/search-dark.png';
+
+const shots = [
+  { src: dark, title: 'Dark', text: 'The default 3ds Max look. Hidden rows fade, frozen ones turn blue, open groups get an amber lock.', alt: 'Layer Manager in the dark theme with nested layers open and an object selected' },
+  { src: light, title: 'Light', text: 'Running 3ds Max with the light colour scheme? The panel opens light, with no setting to change.', alt: 'The same panel in the light theme' },
+  { src: search, title: 'Search', text: 'Typing “lamp” leaves only the layers that hold a match, opened on the objects that were found.', alt: 'The panel filtered by the word lamp' },
+];
+---
+
+<section id="themes" class="border-t border-line bg-card dark:border-line-dark dark:bg-card-dark">
+  <div class="mx-auto max-w-6xl px-6 py-24">
+    <div class="max-w-2xl">
+      <p class="text-sm font-semibold tracking-wide text-accent-deep uppercase dark:text-accent">Themes</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">Looks like it belongs in 3ds Max</h2>
+      <p class="mt-4 text-lg text-ink-muted text-pretty dark:text-ink-muted-dark">
+        The panel reads the interface colours of 3ds Max and picks its dark or light palette to match.
+        The icons are vector, so they stay sharp on any display scaling.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-x-8 gap-y-14 md:grid-cols-3">
+      {shots.map((s) => (
+        <figure>
+          <div class="flex justify-center rounded-2xl bg-paper px-5 py-8 dark:bg-paper-dark">
+            <Shot src={s.src} alt={s.alt} width={300} />
+          </div>
+          <figcaption class="mt-5">
+            <span class="font-semibold tracking-tight">{s.title}</span>
+            <span class="text-ink-muted dark:text-ink-muted-dark"> · {s.text}</span>
+          </figcaption>
+        </figure>
+      ))}
+    </div>
+  </div>
+</section>
