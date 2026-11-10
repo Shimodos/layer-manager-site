@@ -32,32 +32,16 @@ body {
   @apply bg-paper text-ink antialiased dark:bg-paper-dark dark:text-ink-dark;
 }
 
-/* ---- animated demo (see components/Demo.astro) ---- */
+/* ---- carousel of panel states (see components/Demo.astro) ---- */
 
-.demo-frame {
-  opacity: 0;
-  transition: opacity 180ms ease;
+.demo-track {
+  transition: transform 550ms cubic-bezier(0.3, 0.7, 0.2, 1);
+  will-change: transform;
 }
 
-.demo-frame.is-on {
-  opacity: 1;
-}
-
-.demo-pointer {
-  transition: left 750ms cubic-bezier(0.3, 0.7, 0.2, 1), top 750ms cubic-bezier(0.3, 0.7, 0.2, 1), opacity 300ms ease;
-}
-
-.demo-ring {
-  opacity: 0;
-}
-
-.demo-pointer.is-click .demo-ring {
-  animation: demo-click 420ms ease-out;
-}
-
-@keyframes demo-click {
-  0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.3); }
-  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+/* While a finger or the mouse holds the track it follows 1:1, without easing. */
+.demo-track.is-dragging {
+  transition: none;
 }
 
 .demo-dot {
@@ -70,8 +54,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .demo-frame,
-  .demo-pointer,
+  .demo-track,
   .demo-dot {
     transition: none;
   }
