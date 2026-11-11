@@ -34,28 +34,65 @@ body {
 
 /* ---- carousel of panel states (see components/Demo.astro) ---- */
 
-.demo-track {
-  transition: transform 550ms cubic-bezier(0.3, 0.7, 0.2, 1);
-  will-change: transform;
+/* Slides glide to their place in the ring; position, size and dimming move together. */
+.demo-slide {
+  transform-origin: center;
+  transition:
+    transform 900ms cubic-bezier(0.22, 0.8, 0.2, 1),
+    opacity 900ms cubic-bezier(0.22, 0.8, 0.2, 1);
+  will-change: transform, opacity;
 }
 
-/* While a finger or the mouse holds the track it follows 1:1, without easing. */
-.demo-track.is-dragging {
+/* While a finger or the mouse holds the ring it follows 1:1, without easing. */
+.demo-stage.is-dragging .demo-slide {
   transition: none;
 }
 
 .demo-dot {
-  transition: width 200ms ease, background-color 200ms ease;
+  transition: width 300ms ease;
 }
 
 .demo-dot.is-on {
-  width: 1.5rem;
-  background-color: var(--color-accent);
+  width: 1.75rem;
 }
 
+/* The active dot is a small progress bar: it fills while its slide is in front. */
+.demo-dot-fill {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.demo-dot.is-on .demo-dot-fill {
+  transform: scaleX(1);
+}
+
+.demo.is-playing .demo-dot.is-on .demo-dot-fill {
+  animation: demo-fill var(--demo-interval, 2600ms) linear both;
+}
+
+@keyframes demo-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Reduced motion: nothing travels. Only the front slide is shown, and slides
+   cross-fade in place. */
 @media (prefers-reduced-motion: reduce) {
-  .demo-track,
+  .demo-slide {
+    transform: none !important;
+    transition: opacity 500ms ease;
+  }
+
+  .demo-slide[aria-hidden="true"] {
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
   .demo-dot {
     transition: none;
+  }
+
+  .demo.is-playing .demo-dot.is-on .demo-dot-fill {
+    animation: none;
   }
 }

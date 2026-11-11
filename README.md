@@ -28,6 +28,8 @@ Copy-Item ..\LayerManager\docs\shots\og.png, ..\LayerManager\docs\shots\icon-256
 ```
 
 `src/assets/demo/demo.json` lists the slides of the hero carousel and their captions
-(`src/components/Demo.astro`). The carousel advances every 3.5 s while it is on screen,
-pauses under the mouse, and can be dragged left / right with the mouse or a finger.
-For visitors who prefer reduced motion the slides change without the sliding animation.
+(`src/components/Demo.astro`). The slides sit in a ring: the current one in front, its
+neighbours peeking out behind it. The ring turns every 2.6 s while it is on screen (the
+active dot fills up as a timer), pauses under the mouse, can be dragged left / right with
+the mouse or a finger, and a side slide comes forward when clicked. For visitors who prefer
+reduced motion only the front slide is shown and slides cross-fade in place.

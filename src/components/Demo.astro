@@ -2,7 +2,11 @@
 // A carousel of panel states. Every slide is a real render of the panel made
 // inside 3ds Max (LayerManager/tools/make_shots.ps1); demo.json lists the slides
 // and their captions. The panel follows the site theme, like it follows the
-// 3ds Max theme. Slides advance on their own and can be dragged left / right.
+// 3ds Max theme.
+//
+// The slides sit in a ring: the current one in front, its neighbours peeking
+// out smaller and dimmer behind it. They glide round on their own, can be
+// dragged left / right, and a side slide comes forward when clicked.
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
 import manifest from '../assets/demo/demo.json';
@@ -19,28 +23,31 @@ const slides = manifest.themes.dark.map((frame, i) => ({
 ---
 
 <figure
-  class="demo mx-auto w-full max-w-[380px]"
+  class="demo mx-auto w-full max-w-[300px] lg:max-w-[380px]"
   data-captions={JSON.stringify(slides.map((s) => s.caption))}
   role="group"
   aria-roledescription="carousel"
   aria-label="Layer Manager panel in different states"
 >
   <div
-    class="demo-viewport relative cursor-grab touch-pan-y overflow-hidden rounded-2xl ring-1 ring-black/10 select-none shadow-[0_40px_80px_-30px_rgba(0,0,0,0.45)] dark:ring-white/10 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)]"
+    class="demo-stage relative cursor-grab touch-pan-y select-none"
     style={`aspect-ratio: ${width} / ${height}`}
     tabindex="0"
   >
-    <div class="demo-track flex h-full">
-      {slides.map((slide, i) => (
-        <div class="relative h-full w-full shrink-0" aria-hidden={i === 0 ? 'false' : 'true'} data-slide={i}>
-          <Image src={slide.dark} alt={slide.caption} width={width * 2} loading="eager" draggable="false" class="hidden size-full dark:block" />
-          <Image src={slide.light} alt={slide.caption} width={width * 2} loading="eager" draggable="false" class="size-full dark:hidden" />
-        </div>
-      ))}
-    </div>
+    {slides.map((slide, i) => (
+      <div
+        class="demo-slide absolute inset-0 overflow-hidden rounded-2xl bg-card ring-1 ring-black/10 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.45)] dark:bg-card-dark dark:ring-white/10 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)]"
+        style={i === 0 ? '' : 'opacity: 0'}
+        aria-hidden={i === 0 ? 'false' : 'true'}
+        data-slide={i}
+      >
+        <Image src={slide.dark} alt={slide.caption} width={width * 2} loading="eager" draggable="false" class="hidden size-full dark:block" />
+        <Image src={slide.light} alt={slide.caption} width={width * 2} loading="eager" draggable="false" class="size-full dark:hidden" />
+      </div>
+    ))}
   </div>
 
-  <figcaption class="mt-5 text-center">
+  <figcaption class="mt-6 text-center">
     <p class="demo-caption min-h-[1.5rem] text-sm font-medium text-ink-muted dark:text-ink-muted-dark" aria-live="polite">{slides[0].caption}</p>
     <div class="mt-3 flex justify-center gap-1.5">
       {slides.map((slide, i) => (
@@ -48,25 +55,28 @@ const slides = manifest.themes.dark.map((frame, i) => ({
           type="button"
           data-dot={i}
           aria-label={`Slide ${i + 1}: ${slide.caption}`}
-          class:list={['demo-dot h-1.5 w-1.5 cursor-pointer rounded-full bg-line dark:bg-line-dark', i === 0 && 'is-on']}
-        ></button>
+          class:list={['demo-dot relative h-1.5 w-1.5 cursor-pointer overflow-hidden rounded-full bg-line dark:bg-line-dark', i === 0 && 'is-on']}
+        >
+          <span class="demo-dot-fill absolute inset-0 rounded-full bg-accent"></span>
+        </button>
       ))}
     </div>
   </figcaption>
 </figure>
 
 <script>
-  const INTERVAL = 3500; // ms a slide stays before the next one swipes in
-  const THRESHOLD = 0.18; // share of the width a drag must cover to change slide
+  const INTERVAL = 2600; // ms a slide stays in front
+  const THRESHOLD = 0.18; // share of a step a drag must cover to change slide
+  const DRAG_SPAN = 0.6; // share of the width that equals one slide while dragging
 
   document.querySelectorAll<HTMLElement>('.demo').forEach((root) => {
     const captions: string[] = JSON.parse(root.dataset.captions ?? '[]');
-    const viewport = root.querySelector<HTMLElement>('.demo-viewport')!;
-    const track = root.querySelector<HTMLElement>('.demo-track')!;
-    const slides = root.querySelectorAll<HTMLElement>('[data-slide]');
-    const dots = root.querySelectorAll<HTMLElement>('[data-dot]');
+    const stage = root.querySelector<HTMLElement>('.demo-stage')!;
+    const slides = [...root.querySelectorAll<HTMLElement>('[data-slide]')];
+    const dots = [...root.querySelectorAll<HTMLElement>('[data-dot]')];
     const caption = root.querySelector<HTMLElement>('.demo-caption')!;
-    const count = captions.length;
+    const count = slides.length;
+    root.style.setProperty('--demo-interval', `${INTERVAL}ms`);
 
     let index = 0;
     let timer = 0;
@@ -74,69 +84,100 @@ const slides = manifest.themes.dark.map((frame, i) => ({
     let hovered = false;
     let drag: { id: number; startX: number; dx: number } | null = null;
 
-    const place = (offsetPx = 0) => {
-      track.style.transform = `translateX(calc(${-index * 100}% + ${offsetPx}px))`;
+    // Where each slide sits for a (possibly fractional) position in the ring.
+    // d is the signed distance from the front: 0 in front, ±1 the neighbours,
+    // ±2 hidden behind them, which is also where a slide changes sides unseen.
+    const layout = (position: number) => {
+      slides.forEach((slide, i) => {
+        let d = (((i - position) % count) + count) % count;
+        if (d > count / 2) d -= count;
+        const a = Math.abs(d);
+        const near = Math.min(a, 1);
+        const far = Math.min(Math.max(a - 1, 0), 1);
+        const shift = Math.sign(d) * (24 * near + 14 * far);
+        const scale = 1 - 0.14 * near - 0.1 * far;
+        const opacity = a <= 1 ? 1 - 0.55 * a : Math.max(0, 0.45 * (2 - a));
+        slide.style.transform = `translateX(${shift}%) scale(${scale})`;
+        slide.style.opacity = String(opacity);
+        slide.style.zIndex = String(Math.round(20 - a * 5));
+        slide.style.pointerEvents = opacity < 0.05 ? 'none' : '';
+      });
     };
 
+    const mod = (n: number) => ((n % count) + count) % count;
+
     const go = (next: number) => {
-      index = (next + count) % count;
-      track.classList.remove('is-dragging');
-      place();
-      dots.forEach((d) => d.classList.toggle('is-on', Number(d.dataset.dot) === index));
-      slides.forEach((s) => s.setAttribute('aria-hidden', String(Number(s.dataset.slide) !== index)));
+      index = mod(next);
+      stage.classList.remove('is-dragging');
+      layout(index);
+      dots.forEach((dot, i) => dot.classList.toggle('is-on', i === index));
+      slides.forEach((slide, i) => slide.setAttribute('aria-hidden', String(i !== index)));
       caption.textContent = captions[index];
     };
 
     const stop = () => {
-      clearInterval(timer);
+      clearTimeout(timer);
       timer = 0;
+      root.classList.remove('is-playing');
     };
 
     // Autoplay runs while the carousel is on screen and nobody is holding or hovering it.
+    // The active dot fills up over the same interval, so the next move is expected.
     const schedule = () => {
       stop();
-      if (visible && !hovered && !drag) timer = window.setInterval(() => go(index + 1), INTERVAL);
+      if (!visible || hovered || drag) return;
+      void root.offsetWidth; // restart the dot's fill animation
+      root.classList.add('is-playing');
+      timer = window.setTimeout(() => {
+        go(index + 1);
+        schedule();
+      }, INTERVAL);
     };
 
-    dots.forEach((dot) =>
+    dots.forEach((dot, i) =>
       dot.addEventListener('click', () => {
-        go(Number(dot.dataset.dot));
+        go(i);
         schedule();
       }),
     );
 
     // Swipe with the mouse, a finger or a pen.
-    viewport.addEventListener('pointerdown', (event) => {
+    stage.addEventListener('pointerdown', (event) => {
       if (event.pointerType === 'mouse' && event.button !== 0) return;
       drag = { id: event.pointerId, startX: event.clientX, dx: 0 };
-      viewport.setPointerCapture(event.pointerId);
-      track.classList.add('is-dragging');
-      viewport.classList.add('cursor-grabbing');
+      stage.setPointerCapture(event.pointerId);
+      stage.classList.add('cursor-grabbing');
       stop();
     });
 
-    viewport.addEventListener('pointermove', (event) => {
+    stage.addEventListener('pointermove', (event) => {
       if (!drag || event.pointerId !== drag.id) return;
       drag.dx = event.clientX - drag.startX;
-      // Resist at the two ends, where there is nothing to reveal.
-      const atEdge = (index === 0 && drag.dx > 0) || (index === count - 1 && drag.dx < 0);
-      place(atEdge ? drag.dx / 3 : drag.dx);
+      if (Math.abs(drag.dx) < 4) return;
+      stage.classList.add('is-dragging'); // follow the pointer 1:1, without easing
+      layout(index - drag.dx / (stage.clientWidth * DRAG_SPAN));
     });
 
     const release = (event: PointerEvent) => {
       if (!drag || event.pointerId !== drag.id) return;
-      const moved = drag.dx / viewport.clientWidth;
+      const dx = drag.dx;
       drag = null;
-      viewport.classList.remove('cursor-grabbing');
-      if (moved <= -THRESHOLD && index < count - 1) go(index + 1);
-      else if (moved >= THRESHOLD && index > 0) go(index - 1);
-      else go(index);
+      stage.classList.remove('cursor-grabbing');
+      if (Math.abs(dx) < 4) {
+        // A click, not a drag: bring the slide under the pointer to the front.
+        const hit = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>('[data-slide]');
+        go(hit ? Number(hit.dataset.slide) : index);
+      } else {
+        const steps = -dx / (stage.clientWidth * DRAG_SPAN);
+        const whole = Math.abs(steps) >= THRESHOLD ? Math.sign(steps) * Math.max(1, Math.round(Math.abs(steps))) : 0;
+        go(index + whole);
+      }
       schedule();
     };
-    viewport.addEventListener('pointerup', release);
-    viewport.addEventListener('pointercancel', release);
+    stage.addEventListener('pointerup', release);
+    stage.addEventListener('pointercancel', release);
 
-    viewport.addEventListener('keydown', (event) => {
+    stage.addEventListener('keydown', (event) => {
       if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
       event.preventDefault();
       go(index + (event.key === 'ArrowRight' ? 1 : -1));
@@ -151,6 +192,11 @@ const slides = manifest.themes.dark.map((frame, i) => ({
       hovered = false;
       schedule();
     });
+
+    stage.classList.add('is-dragging'); // first placement without animation
+    layout(0);
+    void stage.offsetWidth;
+    stage.classList.remove('is-dragging');
 
     new IntersectionObserver(
       (entries) => {
