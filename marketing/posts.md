@@ -21,9 +21,7 @@ purpose; the links go in the reply.
 ### Post (with promo.mp4)
 
 ```text
-The Scene Explorer in 3ds Max does a lot. I wanted a small panel for layers only, so I made one.
-
-Layer Manager:
+I made a simpler layer manager for 3ds Max: a modern, intuitive design that makes working with layers easier.
 
 - nested layers and their objects on one list
 - hide or freeze a layer, an object or a whole group in one click
@@ -32,7 +30,7 @@ Layer Manager:
 Free, open source.
 ```
 
-278 of 280. The list uses plain hyphens on purpose: X counts a "•" bullet as two characters.
+275 of 280. The list uses plain hyphens on purpose: X counts a "•" bullet as two characters.
 
 ### Reply 1
 
@@ -67,7 +65,7 @@ attachment: remove the card (the × on it) before adding the video.
 ```text
 In a big 3ds Max scene, finding the right layer can take longer than the work you wanted to do on it. So I wrote a small panel that does one thing: layers.
 
-It is called Layer Manager. It is a floating window small enough to keep open next to the viewport, and it is free and open source.
+It is called Layer Manager: a simplified layer manager for 3ds Max with a modern design, made to be intuitive and to take the friction out of everyday work with layers. It is a floating window small enough to keep open next to the viewport, and it is free and open source.
 
 What it does:
 
