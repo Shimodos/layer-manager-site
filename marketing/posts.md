@@ -20,6 +20,8 @@ purpose; the links go in the reply.
 
 ### Post (with promo.mp4)
 
+Published 2026-11-17: https://x.com/demchenko_a/status/2122776583249502679
+
 ```text
 I made a simpler layer manager for 3ds Max: a modern, intuitive design that makes working with layers easier.
 
@@ -34,6 +36,8 @@ Free, open source.
 
 ### Reply 1
 
+Published 2026-11-17: https://x.com/demchenko_a/status/2122776835755053061
+
 ```text
 It follows the scene live, also when you change things in the Scene Explorer, and every change is one undo step.
 
@@ -43,7 +47,7 @@ Code (one Python file, MIT): https://github.com/Shimodos/LayerManager
 #3dsmax #archviz #python #opensource
 ```
 
-### Reply 2 (optional, for the curious)
+### Reply 2 (optional, for the curious) — not posted
 
 ```text
 The same file runs on PySide2 (3ds Max 2024) and PySide6 (2026).
@@ -59,8 +63,11 @@ The first two lines are what LinkedIn shows before "see more", so they carry the
 
 ### Post (with promo.mp4)
 
+Published 2026-11-17: https://www.linkedin.com/feed/update/urn:li:activity:7528543121513590784/
+
 LinkedIn attaches a link preview card as soon as a URL is typed, and a post can carry only one
-attachment: remove the card (the × on it) before adding the video.
+attachment: add the video first (the media button, then Next) and type the text after it, so no
+card appears.
 
 ```text
 In a big 3ds Max scene, finding the right layer can take longer than the work you wanted to do on it. So I wrote a small panel that does one thing: layers.
