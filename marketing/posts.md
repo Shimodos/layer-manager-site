@@ -63,7 +63,9 @@ The first two lines are what LinkedIn shows before "see more", so they carry the
 
 ### Post (with promo.mp4)
 
-Published 2026-11-17: https://www.linkedin.com/feed/update/urn:li:activity:7528543121513590784/
+Published 2026-11-17 (Aleksey Demchenko, the developer profile): https://www.linkedin.com/feed/update/urn:li:activity:7528543121513590784/
+
+Published 2026-11-19 (Oleksiy Demchenko, the 3D profile), same text and video: https://www.linkedin.com/feed/update/urn:li:activity:7529137319313047553/
 
 LinkedIn attaches a link preview card as soon as a URL is typed, and a post can carry only one
 attachment: add the video first (the media button, then Next) and type the text after it, so no
